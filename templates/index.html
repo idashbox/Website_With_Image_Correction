@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload and Adjust Image</title>
+    <script>
+        function updateImage() {
+            const form = document.getElementById('imageForm');
+            const formData = new FormData(form);
+            fetch('/upload', { method: 'POST', body: formData })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('preview').src = url;
+                    document.getElementById('downloadButton').setAttribute('data-url', url);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function downloadImage() {
+            const url = document.getElementById('downloadButton').getAttribute('data-url');
+            if (url) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'adjusted_image.jpeg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sliders = document.querySelectorAll('input[type="range"]');
+            sliders.forEach(slider => {
+                slider.addEventListener('input', updateImage);
+            });
+            const fileInput = document.querySelector('input[type="file"]');
+            fileInput.addEventListener('change', updateImage);
+            const downloadBtn = document.getElementById('downloadButton');
+            downloadBtn.addEventListener('click', downloadImage);
+        });
+    </script>
+</head>
+<body>
+    <h1>Image Upload and Adjustment</h1>
+    <form id="imageForm" enctype="multipart/form-data">
+        <input type="file" name="image" required onchange="updateImage()">
+        <label for="brightness">Brightness:</label>
+        <input type="range" name="brightness" min="0.5" max="1.5" step="0.1" value="1.0">
+        <label for="contrast">Contrast:</label>
+        <input type="range" name="contrast" min="0.5" max="1.5" step="0.1" value="1.0">
+        <label for="saturation">Saturation:</label>
+        <input type="range" name="saturation" min="0.5" max="1.5" step="0.1" value="1.0">
+        <label for="sharpness">Sharpness:</label>
+        <input type="range" name="sharpness" min="0.5" max="1.5" step="0.1" value="1.0">
+    </form>
+    <img id="preview" src="#" alt="Image preview...">
+    <button id="downloadButton" data-url="" style="margin-top: 10px;">Download Adjusted Image</button>
+</body>
+</html>
